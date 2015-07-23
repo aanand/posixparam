@@ -1,5 +1,7 @@
 from __future__ import unicode_literals
 
+import six
+
 from .parser import (
     lex, parse,
     Literal, Substitution,
@@ -8,11 +10,14 @@ from .parser import (
 
 
 def sub(text, **variables):
+    if isinstance(text, six.binary_type):
+        text = text.decode('utf-8')
+
     try:
         tokens = lex(text)
         nodes = parse(tokens)
         chunks = perform_substitutions(nodes, variables)
-        return ''.join(chunks)
+        return six.text_type().join(chunks)
     except InternalParseError as e:
         raise ParseError(e, text)
 
@@ -22,7 +27,16 @@ def perform_substitutions(nodes, variables):
         if isinstance(node, Literal):
             yield node.text
         elif isinstance(node, Substitution):
-            yield variables[node.variable_name]
+            value = variables.get(node.variable_name, six.text_type())
+            if isinstance(value, six.text_type):
+                yield value
+            elif isinstance(value, six.binary_type):
+                yield value.decode('utf-8')
+            else:
+                raise ValueError(
+                    "Unsupported value type ({}): {!r}"
+                    .format(type(value), value)
+                )
         else:
             raise ValueError("Unrecognised node type: {!r}".format(node))
 
