@@ -30,7 +30,7 @@ def perform_substitutions(nodes, variables):
 class ParseError(Exception):
     def __init__(self, internal_parse_error, text):
         self.reason = internal_parse_error.reason
-        self.diagram = build_diagram(text, internal_parse_error.arrows)
+        self.diagram = build_diagram(text, internal_parse_error.points)
 
     def __unicode__(self):
         return "ParseError: {}\n\n{}".format(self.reason, self.diagram)
@@ -39,11 +39,11 @@ class ParseError(Exception):
         return unicode(self).encode('utf-8')
 
 
-def build_diagram(text, arrows):
+def build_diagram(text, points):
     diagram = text + "\n"
     position = 0
 
-    for arrow_position in arrows:
+    for arrow_position in points:
         for _ in range(position, arrow_position):
             diagram += "-"
         diagram += "^"

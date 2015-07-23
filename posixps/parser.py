@@ -65,7 +65,7 @@ class MissingOpeningBrace(InternalParseError):
     def __init__(self, position):
         self.position = position
         self.reason = "Missing opening brace"
-        self.arrows = [position]
+        self.points = [position]
 
 
 class MissingClosingBrace(InternalParseError):
@@ -76,4 +76,4 @@ class MissingClosingBrace(InternalParseError):
         self.reason = "Opening brace at char {} is " \
                       "missing a closing brace".format(opening_brace_position)
 
-        self.arrows = [opening_brace_position, error_position]
+        self.points = [opening_brace_position, error_position]
