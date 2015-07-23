@@ -2,7 +2,7 @@ from __future__ import unicode_literals
 
 import pytest
 
-from posixps.sub import (
+from posixps.parser import (
     lex, parse, parse_substitution,
     Literal, Substitution,
     MissingOpeningBrace,
