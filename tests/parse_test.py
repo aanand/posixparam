@@ -14,10 +14,25 @@ def test_no_subs():
     assert list(parse(lex("hello world"))) == [Literal("hello world")]
 
 
-def test_simple_sub():
-    assert list(parse(lex("hello ${thing}"))) == [
-        Literal("hello "),
+def test_simple_subs():
+    assert list(parse(lex("${thing}"))) == [
         Substitution("thing"),
+    ]
+
+    assert list(parse(lex("${subject} love you"))) == [
+        Substitution("subject"),
+        Literal(" love you"),
+    ]
+
+    assert list(parse(lex("i ${verb} you"))) == [
+        Literal("i "),
+        Substitution("verb"),
+        Literal(" you"),
+    ]
+
+    assert list(parse(lex("i love ${object}"))) == [
+        Literal("i love "),
+        Substitution("object"),
     ]
 
 
