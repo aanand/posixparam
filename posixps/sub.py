@@ -39,7 +39,7 @@ def parse(tokens):
 def parse_substitution(tokens):
     opening_brace = next(tokens)
     if opening_brace != '{':
-        raise ParseError("Expected '{', got {!r}".format(opening_brace))
+        raise ParseError("Expected '{{', got {!r}".format(opening_brace))
 
     variable_name = ''
 
@@ -50,7 +50,7 @@ def parse_substitution(tokens):
             variable_name += char
 
     if variable_name:
-        raise ParseError("Expected '}', got to end of input")
+        raise ParseError("Expected '}}', got to end of input")
 
 
 def perform_substitutions(nodes, variables):
