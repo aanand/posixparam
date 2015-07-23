@@ -11,14 +11,14 @@ from posixps.sub import (
 
 
 def test_no_subs():
-    assert(list(parse(lex("hello world"))) == [Literal("hello world")])
+    assert list(parse(lex("hello world"))) == [Literal("hello world")]
 
 
 def test_simple_sub():
-    assert(list(parse(lex("hello ${thing}"))) == [
+    assert list(parse(lex("hello ${thing}"))) == [
         Literal("hello "),
         Substitution("thing"),
-    ])
+    ]
 
 
 def test_no_opening_brace():

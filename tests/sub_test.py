@@ -6,11 +6,11 @@ from posixps import sub, ParseError
 
 
 def test_no_subs():
-    assert(sub("hello world") == "hello world")
+    assert sub("hello world") == "hello world"
 
 
 def test_simple_sub():
-    assert(sub("hello ${thing}", thing="world") == "hello world")
+    assert sub("hello ${thing}", thing="world") == "hello world"
 
 
 def test_no_opening_brace():
