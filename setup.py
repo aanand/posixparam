@@ -35,8 +35,8 @@ tests_require = [
 
 
 setup(
-    name='posixps',
-    version=find_version("posixps", "__init__.py"),
+    name='posixparam',
+    version=find_version("posixparam", "__init__.py"),
     description='Implementation of a subset of POSIX parameter substitution',
     packages=find_packages(exclude=['tests.*', 'tests']),
     include_package_data=True,

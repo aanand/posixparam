@@ -2,7 +2,7 @@ from __future__ import unicode_literals
 
 import pytest
 
-from posixps import sub, ParseError
+from posixparam import sub, ParseError
 
 
 def test_no_subs():
