@@ -54,8 +54,5 @@ def test_no_closing_brace():
 def test_parse_substitution():
     tokens = lex("{thing}remainder")
 
-    substitution, length = parse_substitution(tokens, 0)
-
-    assert substitution == Substitution("thing")
-    assert length == 7
-    assert ''.join(tokens) == "remainder"
+    assert parse_substitution(tokens) == Substitution("thing")
+    assert ''.join(char for (char, _) in tokens) == "remainder"

@@ -1,60 +1,60 @@
 from __future__ import unicode_literals
 
 from collections import namedtuple
+from six.moves import zip as izip
+from itertools import count
+
+Token = namedtuple('Token', 'char pos')
 
 Literal = namedtuple('Literal', 'text')
 Substitution = namedtuple('Substitution', 'variable_name')
 
 
 def lex(text):
-    return (c for c in text)
+    return (
+        Token(char, pos)
+        for (char, pos) in izip(iter(text), count())
+    )
 
 
 def parse(tokens):
     literal_text = ''
-    position = 0
 
-    for char in tokens:
-        if char == '$':
+    for token in tokens:
+        if token.char == '$':
             if literal_text:
                 yield Literal(literal_text)
                 literal_text = ''
 
-            position += 1
-
-            substitution, length = parse_substitution(tokens, position)
+            substitution = parse_substitution(tokens)
             yield substitution
-            position += length
         else:
-            literal_text += char
-            position += 1
+            literal_text += token.char
 
     if literal_text:
         yield Literal(literal_text)
         literal_text = ''
 
 
-def parse_substitution(tokens, starting_position):
-    position = starting_position
+def parse_substitution(tokens):
+    next_token = next(tokens)
+    if next_token.char != '{':
+        raise MissingOpeningBrace(next_token.pos)
 
-    opening_brace = next(tokens)
-    if opening_brace != '{':
-        raise MissingOpeningBrace(position)
-
-    position += 1
+    opening_brace_position = next_token.pos
+    current_position = next_token.pos
 
     variable_name = ''
 
-    for char in tokens:
-        position += 1
-
-        if char == '}':
-            return Substitution(variable_name), position - starting_position
+    for token in tokens:
+        current_position = token.pos
+        if token.char == '}':
+            return Substitution(variable_name)
         else:
-            variable_name += char
+            variable_name += token.char
 
     if variable_name:
-        raise MissingClosingBrace(starting_position, position)
+        raise MissingClosingBrace(opening_brace_position, current_position+1)
 
 
 class InternalParseError(Exception):
