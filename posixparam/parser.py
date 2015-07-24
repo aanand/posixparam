@@ -4,10 +4,14 @@ from collections import namedtuple
 from six.moves import zip as izip
 from itertools import count
 
+import re
+
 Token = namedtuple('Token', 'char pos')
 
 Literal = namedtuple('Literal', 'text')
 Substitution = namedtuple('Substitution', 'variable_name')
+
+VARIABLE_NAME = re.compile(r'^[a-zA-Z_][a-zA-Z0-9_]*$')
 
 
 def lex(text):
@@ -57,6 +61,10 @@ def parse_substitution(tokens, last_token):
             if not variable_name:
                 raise EmptyVariableName(token.pos)
 
+            if not VARIABLE_NAME.match(variable_name):
+                raise InvalidVariableName(
+                    opening_brace_position+1, variable_name)
+
             return Substitution(variable_name)
         else:
             variable_name += token.char
@@ -101,4 +109,14 @@ class EmptyVariableName(InternalParseError):
     def __init__(self, position):
         self.position = position
         self.reason = "Empty variable name"
+        self.points = [position]
+
+
+class InvalidVariableName(InternalParseError):
+    def __init__(self, position, variable_name):
+        self.position = position
+        self.variable_name = variable_name
+        self.reason = "Invalid variable name '{}'. " \
+                      "Names must contain only a-z, A-Z, 0-9 and underscores, " \
+                      "and not begin with a digit.".format(variable_name)
         self.points = [position]

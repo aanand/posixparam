@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 from __future__ import unicode_literals
 
 import pytest
@@ -10,6 +12,7 @@ from posixparam.parser import (
     MissingClosingBrace,
     PrematureEndOfInput,
     EmptyVariableName,
+    InvalidVariableName,
 )
 
 
@@ -88,6 +91,57 @@ def test_empty_variable_name():
 
     assert excinfo.value.position == 8
 
+
+def test_valid_variable_name():
+    assert next(parse(lex("${foo}"))) == Substitution("foo")
+    assert next(parse(lex("${foo_bar}"))) == Substitution("foo_bar")
+    assert next(parse(lex("${foo_bar_1}"))) == Substitution("foo_bar_1")
+    assert next(parse(lex("${_foo_bar_1}"))) == Substitution("_foo_bar_1")
+    assert next(parse(lex("${_foo_bar_1_}"))) == Substitution("_foo_bar_1_")
+
+    assert next(parse(lex("${FOO}"))) == Substitution("FOO")
+    assert next(parse(lex("${FOO_BAR}"))) == Substitution("FOO_BAR")
+    assert next(parse(lex("${FOO_BAR_1}"))) == Substitution("FOO_BAR_1")
+    assert next(parse(lex("${_FOO_BAR_1}"))) == Substitution("_FOO_BAR_1")
+    assert next(parse(lex("${_FOO_BAR_1_}"))) == Substitution("_FOO_BAR_1_")
+
+    assert next(parse(lex("${fooBar}"))) == Substitution("fooBar")
+    assert next(parse(lex("${fooBar1}"))) == Substitution("fooBar1")
+    assert next(parse(lex("${_fooBar1}"))) == Substitution("_fooBar1")
+    assert next(parse(lex("${_fooBar1_}"))) == Substitution("_fooBar1_")
+
+    assert next(parse(lex("${_1}"))) == Substitution("_1")
+    assert next(parse(lex("${_1_}"))) == Substitution("_1_")
+
+
+def test_invalid_variable_name():
+    with pytest.raises(InvalidVariableName) as excinfo:
+        next(parse(lex("${123}")))
+    assert excinfo.value.position == 2
+
+    with pytest.raises(InvalidVariableName) as excinfo:
+        next(parse(lex("${123}")))
+    assert excinfo.value.variable_name == '123'
+
+    with pytest.raises(InvalidVariableName) as excinfo:
+        next(parse(lex("${1foo}")))
+    assert excinfo.value.variable_name == '1foo'
+
+    with pytest.raises(InvalidVariableName) as excinfo:
+        next(parse(lex("${1_}")))
+    assert excinfo.value.variable_name == '1_'
+
+    with pytest.raises(InvalidVariableName) as excinfo:
+        next(parse(lex("${!}")))
+    assert excinfo.value.variable_name == '!'
+
+    with pytest.raises(InvalidVariableName) as excinfo:
+        next(parse(lex("${gegenüber}")))
+    assert excinfo.value.variable_name == 'gegenüber'
+
+    with pytest.raises(InvalidVariableName) as excinfo:
+        next(parse(lex("${ foo }")))
+    assert excinfo.value.variable_name == ' foo '
 
 def test_parse_substitution():
     tokens = lex("{thing}remainder")
