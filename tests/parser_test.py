@@ -149,3 +149,50 @@ def test_parse_substitution():
 
     assert parse_substitution(tokens, Token('$', 0)) == Substitution("thing")
     assert ''.join(char for (char, _) in tokens) == "remainder"
+
+
+def test_escape_dollar():
+    strings = [
+        "\\${subject} love you",
+        "i \\${verb} you",
+        "i love \\${object}",
+        "hello \\$",
+        "hello \\$\\$",
+        "hello \\${",
+        "hello \\${thing",
+        "hello \\$}",
+        "hello \\${}",
+        "hello \\${123}",
+    ]
+
+    for string in strings:
+        assert next(parse(lex(string))) == Literal(string)
+
+
+def test_backslash_in_literal():
+    assert list(parse(lex("i\\ ${verb} you"))) == [
+        Literal("i\\ "),
+        Substitution("verb"),
+        Literal(" you"),
+    ]
+
+    assert list(parse(lex("i love ${object}\\"))) == [
+        Literal("i love "),
+        Substitution("object"),
+        Literal("\\"),
+    ]
+
+
+def test_invalid_escape():
+    with pytest.raises(MissingOpeningBrace) as excinfo:
+        next(parse(lex("$\\{thing}")))
+    assert excinfo.value.position == 1
+
+    with pytest.raises(InvalidVariableName) as excinfo:
+        next(parse(lex("${thing\\}")))
+    assert excinfo.value.position == 2
+    assert excinfo.value.variable_name == 'thing\\'
+
+    with pytest.raises(InvalidVariableName) as excinfo:
+        next(parse(lex("${th\\ing}")))
+    assert excinfo.value.position == 2

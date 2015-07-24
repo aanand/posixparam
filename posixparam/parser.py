@@ -23,9 +23,12 @@ def lex(text):
 
 def parse(tokens):
     literal_text = ''
+    escaping = False
 
     for token in tokens:
-        if token.char == '$':
+        if token.char == '\\':
+            escaping = True
+        elif token.char == '$' and not escaping:
             if literal_text:
                 yield Literal(literal_text)
                 literal_text = ''
@@ -33,7 +36,14 @@ def parse(tokens):
             substitution = parse_substitution(tokens, token)
             yield substitution
         else:
+            if escaping:
+                literal_text += '\\'
+                escaping = False
             literal_text += token.char
+
+    if escaping:
+        literal_text += '\\'
+        escaping = False
 
     if literal_text:
         yield Literal(literal_text)
