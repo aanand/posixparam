@@ -3,7 +3,8 @@ from __future__ import unicode_literals
 import pytest
 
 from posixparam.parser import (
-    lex, parse, parse_substitution,
+    lex, Token,
+    parse, parse_substitution,
     Literal, Substitution,
     MissingOpeningBrace,
     MissingClosingBrace,
@@ -91,5 +92,5 @@ def test_empty_variable_name():
 def test_parse_substitution():
     tokens = lex("{thing}remainder")
 
-    assert parse_substitution(tokens, 0) == Substitution("thing")
+    assert parse_substitution(tokens, Token('$', 0)) == Substitution("thing")
     assert ''.join(char for (char, _) in tokens) == "remainder"
