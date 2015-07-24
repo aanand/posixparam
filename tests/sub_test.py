@@ -63,7 +63,9 @@ def test_no_closing_brace():
     with pytest.raises(ParseError) as excinfo:
         sub("hello ${thing", dict())
 
-    assert excinfo.value.reason == "Opening brace at char 7 is missing a closing brace"
+    assert excinfo.value.reason == \
+        "Opening brace at char 7 is missing a closing brace"
+
     assert excinfo.value.diagram == \
         "hello ${thing\n" \
         "-------^-----^"

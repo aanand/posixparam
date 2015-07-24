@@ -143,6 +143,7 @@ def test_invalid_variable_name():
         next(parse(lex("${ foo }")))
     assert excinfo.value.variable_name == ' foo '
 
+
 def test_parse_substitution():
     tokens = lex("{thing}remainder")
 
