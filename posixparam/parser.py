@@ -119,4 +119,4 @@ class InvalidVariableName(InternalParseError):
         self.reason = "Invalid variable name '{}'. " \
                       "Names must contain only a-z, A-Z, 0-9 and underscores, " \
                       "and not begin with a digit.".format(variable_name)
-        self.points = [position]
+        self.points = [position, position + len(variable_name) - 1]

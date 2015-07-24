@@ -55,14 +55,15 @@ class ParseError(Exception):
 
 def build_diagram(text, points):
     diagram = text + "\n"
-    position = 0
+    current_position = 0
     fill_char = " "
 
-    for arrow_position in points:
-        for _ in range(position, arrow_position):
-            diagram += fill_char
-        diagram += "^"
-        position = arrow_position + 1
+    for point in points:
+        if point >= current_position:
+            for _ in range(current_position, point):
+                diagram += fill_char
+            diagram += "^"
+            current_position = point + 1
         fill_char = "-"
 
     return diagram

@@ -69,3 +69,24 @@ def test_no_closing_brace():
     assert excinfo.value.diagram == \
         "hello ${thing\n" \
         "       ^-----^"
+
+
+def test_invalid_variable_name():
+    with pytest.raises(ParseError) as excinfo:
+        sub("${0}", dict())
+    assert excinfo.value.diagram == \
+        "${0}\n" \
+        "  ^"
+
+    with pytest.raises(ParseError) as excinfo:
+        sub("${00}", dict())
+    assert excinfo.value.diagram == \
+        "${00}\n" \
+        "  ^^"
+
+    with pytest.raises(ParseError) as excinfo:
+        sub("${0_foo}", dict())
+    assert "Invalid" in excinfo.value.reason
+    assert excinfo.value.diagram == \
+        "${0_foo}\n" \
+        "  ^---^"
