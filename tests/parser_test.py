@@ -7,6 +7,8 @@ from posixparam.parser import (
     Literal, Substitution,
     MissingOpeningBrace,
     MissingClosingBrace,
+    PrematureEndOfInput,
+    EmptyVariableName,
 )
 
 
@@ -46,6 +48,16 @@ def test_no_opening_brace():
 
     assert excinfo.value.position == 7
 
+    with pytest.raises(MissingOpeningBrace) as excinfo:
+        list(parse(lex("hello $$")))
+
+    assert excinfo.value.position == 7
+
+    with pytest.raises(MissingOpeningBrace) as excinfo:
+        list(parse(lex("hello $}")))
+
+    assert excinfo.value.position == 7
+
 
 def test_no_closing_brace():
     with pytest.raises(MissingClosingBrace) as excinfo:
@@ -55,8 +67,29 @@ def test_no_closing_brace():
     assert excinfo.value.error_position == 13
 
 
+def test_premature_end_of_input():
+    with pytest.raises(PrematureEndOfInput) as excinfo:
+        list(parse(lex("hello $")))
+
+    assert excinfo.value.character == '$'
+    assert excinfo.value.position == 7
+
+    with pytest.raises(PrematureEndOfInput) as excinfo:
+        print(list(parse(lex("hello ${"))))
+
+    assert excinfo.value.character == '{'
+    assert excinfo.value.position == 8
+
+
+def test_empty_variable_name():
+    with pytest.raises(EmptyVariableName) as excinfo:
+        list(parse(lex("hello ${}")))
+
+    assert excinfo.value.position == 8
+
+
 def test_parse_substitution():
     tokens = lex("{thing}remainder")
 
-    assert parse_substitution(tokens) == Substitution("thing")
+    assert parse_substitution(tokens, 0) == Substitution("thing")
     assert ''.join(char for (char, _) in tokens) == "remainder"

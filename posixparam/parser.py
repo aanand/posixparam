@@ -26,7 +26,7 @@ def parse(tokens):
                 yield Literal(literal_text)
                 literal_text = ''
 
-            substitution = parse_substitution(tokens)
+            substitution = parse_substitution(tokens, token)
             yield substitution
         else:
             literal_text += token.char
@@ -36,25 +36,35 @@ def parse(tokens):
         literal_text = ''
 
 
-def parse_substitution(tokens):
-    next_token = next(tokens)
+def parse_substitution(tokens, last_token):
+    try:
+        next_token = next(tokens)
+    except StopIteration:
+        raise PrematureEndOfInput(last_token)
+
     if next_token.char != '{':
         raise MissingOpeningBrace(next_token.pos)
 
+    last_token = next_token
     opening_brace_position = next_token.pos
-    current_position = next_token.pos
 
     variable_name = ''
 
     for token in tokens:
-        current_position = token.pos
+        last_token = token
+
         if token.char == '}':
+            if not variable_name:
+                raise EmptyVariableName(token.pos)
+
             return Substitution(variable_name)
         else:
             variable_name += token.char
 
     if variable_name:
-        raise MissingClosingBrace(opening_brace_position, current_position+1)
+        raise MissingClosingBrace(opening_brace_position, last_token.pos + 1)
+    else:
+        raise PrematureEndOfInput(last_token)
 
 
 class InternalParseError(Exception):
@@ -77,3 +87,18 @@ class MissingClosingBrace(InternalParseError):
                       "missing a closing brace".format(opening_brace_position)
 
         self.points = [opening_brace_position, error_position]
+
+
+class PrematureEndOfInput(InternalParseError):
+    def __init__(self, last_token):
+        self.character = last_token.char
+        self.position = last_token.pos + 1
+        self.reason = "Input ends abruptly after '{}'".format(self.character)
+        self.points = [self.position]
+
+
+class EmptyVariableName(InternalParseError):
+    def __init__(self, position):
+        self.position = position
+        self.reason = "Empty variable name"
+        self.points = [position]
