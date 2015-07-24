@@ -10,6 +10,10 @@ from posixparam.parser import (
 )
 
 
+def test_empty_string():
+    assert list(parse(lex(""))) == []
+
+
 def test_no_subs():
     assert list(parse(lex("hello world"))) == [Literal("hello world")]
 
