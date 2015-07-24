@@ -56,7 +56,7 @@ def test_no_opening_brace():
     assert excinfo.value.reason == "Missing opening brace"
     assert excinfo.value.diagram == \
         "hello $thing\n" \
-        "-------^"
+        "       ^"
 
 
 def test_no_closing_brace():
@@ -68,4 +68,4 @@ def test_no_closing_brace():
 
     assert excinfo.value.diagram == \
         "hello ${thing\n" \
-        "-------^-----^"
+        "       ^-----^"
