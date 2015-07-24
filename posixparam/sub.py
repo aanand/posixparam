@@ -9,7 +9,7 @@ from .parser import (
 )
 
 
-def sub(text, **variables):
+def sub(text, variables):
     if isinstance(text, six.binary_type):
         text = text.decode('utf-8')
 
